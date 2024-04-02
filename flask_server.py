@@ -1,17 +1,26 @@
 from flask import Flask, request
 
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, firestore
+from google.cloud import firestore as google_firestore
 
 from hume import HumeBatchClient
 from hume.models.config import ProsodyConfig
+from hume._batch.transcription_config import TranscriptionConfig
 
+from pytz import timezone
+import datetime
 import time
 
 cred = credentials.Certificate("./serviceAccountKey.json")
 firebase_admin.initialize_app(cred)
 
+db = firestore.client()
+
+collection_name = "emotions"
+
 client = HumeBatchClient('tRneADQIiTqoaD8m42PUTKWtD8e4zRte4n6JP3f0gaCgT6XC')
+transcription_config = TranscriptionConfig(language="ko")
 prosody_config = ProsodyConfig()
 
 app = Flask(__name__)
@@ -22,7 +31,7 @@ def create_emotion():
 
     urls = [url]
 
-    job = client.submit_job(urls, [prosody_config])
+    job = client.submit_job(urls, [prosody_config], transcription_config)
     print(job)
     print('Running...')
 
@@ -54,7 +63,7 @@ def create_emotion():
         total += score
 
     for emotion, score in emotions_dict.items():
-        emotions_average[emotion] = round((score / total) * 100, 1) + 0.0
+        emotions_average[emotion] = round((score / total) * 100, 1)
     
     ascend_sorted_emotion_average = sorted(emotions_average, key=emotions_average.get, reverse=True)
 
@@ -64,6 +73,12 @@ def create_emotion():
         emotion_last -= emotions_average[ascend_sorted_emotion_average[i]]
     
     emotions_average[ascend_sorted_emotion_average[-1]] = emotion_last
+
+    emotions_average["audio"] = url
+    emotions_average["createdAt"] = datetime.datetime.now(timezone("Asia/Seoul"))
+
+    doc_ref = db.collection(collection_name).document()
+    doc_ref.set(emotions_average)
 
     print("endtime :", time.time() - start)
 

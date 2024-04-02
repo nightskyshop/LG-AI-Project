@@ -1,12 +1,16 @@
 from hume import HumeBatchClient
 from hume.models.config import ProsodyConfig
+from hume._batch.transcription_config import TranscriptionConfig
+
 import math
 
-client = HumeBatchClient('tRneADQIiTqoaD8m42PUTKWtD8e4zRte4n6JP3f0gaCgT6XC')
-urls = ['https://gohistory.pythonanywhere.com/media/audios/%EA%B3%A0%EB%8C%80_38%EC%9E%A5_%EC%9D%B4%EC%9D%B8%ED%98%9C.mp3']
-prosody_config = ProsodyConfig()
 
-job = client.submit_job(urls, [prosody_config])
+client = HumeBatchClient('tRneADQIiTqoaD8m42PUTKWtD8e4zRte4n6JP3f0gaCgT6XC')
+urls = ['https://firebasestorage.googleapis.com/v0/b/uuuuu-bbd69.appspot.com/o/audio%2F%E1%84%90%E1%85%A6%E1%84%89%E1%85%B3%E1%84%90%E1%85%B3%20%E1%84%8B%E1%85%A9%E1%84%83%E1%85%B5%E1%84%8B%E1%85%A9.mp3?alt=media&token=59144b74-bf22-4fd5-9fe7-dcba20f65b28']
+prosody_config = ProsodyConfig()
+transcription_config = TranscriptionConfig(language="ko")
+
+job = client.submit_job(urls, configs=[prosody_config], transcription_config=transcription_config)
 print(job)
 print('Running...')
 
