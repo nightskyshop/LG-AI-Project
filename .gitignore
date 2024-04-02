@@ -1,3 +1,6 @@
 serviceAccountKey.json
+
 .python-version
+.env
+
 __pycache__

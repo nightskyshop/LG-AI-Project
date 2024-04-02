@@ -8,7 +8,10 @@ from hume import HumeBatchClient
 from hume.models.config import ProsodyConfig
 from hume._batch.transcription_config import TranscriptionConfig
 
+
 from pytz import timezone
+from dotenv import load_dotenv
+import os
 import datetime
 import time
 
@@ -19,7 +22,11 @@ db = firestore.client()
 
 collection_name = "emotions"
 
-client = HumeBatchClient('tRneADQIiTqoaD8m42PUTKWtD8e4zRte4n6JP3f0gaCgT6XC')
+load_dotenv()
+
+API_KEY = os.getenv("API_KEY")
+
+client = HumeBatchClient(API_KEY)
 transcription_config = TranscriptionConfig(language="ko")
 prosody_config = ProsodyConfig()
 
