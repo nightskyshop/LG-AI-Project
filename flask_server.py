@@ -56,11 +56,14 @@ def create_emotion():
             for grouped_prediction in prediction['models']['prosody']['grouped_predictions']:
                 for grouped_prediction_prediction in grouped_prediction['predictions']:
                     for emotion in grouped_prediction_prediction['emotions']:
-                        if emotion['name'] == "Joy" or emotion['name'] == "Anger" or emotion['name'] == "Fear" or emotion['name'] == "Sadness" or emotion['name'] == "Disgust" or emotion['name'] == "Surprise":
-                            if emotion['name'] not in emotions_dict:
-                                emotions_dict[emotion['name']] = emotion['score']
+                        if emotion['name'] == "Joy" or emotion['name'] == "Anger" or emotion['name'] == "Fear" or emotion['name'] == "Sadness" or emotion['name'] == "Disgust" or "Surprise" in emotion['name']:
+                            name = emotion['name']
+                            if "Surprise" in name:
+                                name = "Surprise"
+                            if name not in emotions_dict:
+                                emotions_dict[name] = emotion['score']
                             else:
-                                emotions_dict[emotion['name']] = emotions_dict[emotion['name']] + emotion['score']
+                                emotions_dict[name] = emotions_dict[name] + emotion['score']
 
     emotions_average = dict()
 
