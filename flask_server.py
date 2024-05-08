@@ -12,14 +12,8 @@ from hume._batch.transcription_config import TranscriptionConfig
 from pytz import timezone
 from dotenv import load_dotenv
 
-import numpy as np
-
-import matplotlib.pyplot as plt
-
-import io
 import os
 import time
-import base64
 import datetime
 
 
@@ -89,33 +83,19 @@ def create_emotion():
     
     ascend_sorted_emotion_average = sorted(emotions_average, key=emotions_average.get, reverse=True)
 
-    emotion_last = 100
+    emotion_last = 100.0
 
-    for i in range(4):
+    for i in range(len(ascend_sorted_emotion_average)-1):
         emotion_last -= emotions_average[ascend_sorted_emotion_average[i]]
     
-    emotions_average[ascend_sorted_emotion_average[-1]] = emotion_last
+    emotions_average[ascend_sorted_emotion_average[-1]] = round(emotion_last, 1)
 
-    label_loc = np.linspace(start=0, stop=2*np.pi-1, num=len(emotions_average.keys()))
-
-    fig, ax = plt.subplots(1,1, figsize=(5,20), subplot_kw={'projection': 'polar'})
-    ax.set_xticks(label_loc, labels=emotions_average.keys(), fontsize=13)
-    ax.plot(label_loc, emotions_average.values(), color="skyblue")
-    ax.fill(label_loc, emotions_average.values(), color="skyblue", alpha=0.3)
-
-    my_stringIObytes = io.BytesIO()
-    plt.savefig(my_stringIObytes, format='jpg', bbox_inches="tight")
-    my_stringIObytes.seek(0)
-    my_base64_jpgData = base64.b64encode(my_stringIObytes.read()).decode()
-
-    blob = bucket.blob("images/" + str(int(time.time())) + ".jpg")
-    blob.upload_from_string(my_base64_jpgData, content_type="image/jpg")
-    blob.make_public()
-    
-    emotions_average["image"] = my_base64_jpgData
+    emotions_average["maxEmotion"] = ascend_sorted_emotion_average[0]
 
     emotions_average["audio"] = url
-    emotions_average["createdAt"] = datetime.datetime.now(timezone("Asia/Seoul"))
+
+    now = datetime.datetime.now(timezone("Asia/Seoul"))
+    emotions_average["createdAt"] = f"{str(now.year).zfill(4)}년 {str(now.month).zfill(2)}월 {str(now.day).zfill(2)}일 {str(now.hour).zfill(2)}시 {str(now.minute).zfill(2)}분"
 
     doc_ref = db.collection(collection_name).document()
     doc_ref.set(emotions_average)
